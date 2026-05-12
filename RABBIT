@@ -1,0 +1,20 @@
+public class Rabbit extends Critter 
+{     
+    public Rabbit() 
+    {         
+        super("Rabbit", "R");     
+    }      
+    @Override    
+    public String interact(Critter other) 
+    {         
+        if (other.getType().equals("Wolf")) 
+        {             
+            return "Wolf eats the Rabbit! Rabbit is removed.";         
+        }         
+        if (other.getType().equals("Rabbit")) 
+        {             
+            return "Two Rabbits meet — a new Rabbit is born nearby!";         
+        }         
+        return "Rabbit hops away from " + other.getType() + ".";     
+    } 
+}
