@@ -1,0 +1,150 @@
+import java.util.Scanner;  
+public class Ecosystem  
+{          
+    public static void displayGrid(Critter[][] world, int size)      
+    {                
+        System.out.println();        
+        for (int row = 0; row < size; row++)      
+        {                      
+            for (int col = 0; col < size; col++)    
+            {                          
+                if (world[row][col] == null)          
+                {                                
+                    System.out.print(".  ");       
+                }      
+                else      
+                {         
+                    System.out.print(world[row][col].getSymbol() + "  ");       
+                }                       
+            }             
+            System.out.println();         
+        }        
+    }            
+    
+    public static void printStats(Critter[][] world, int size)  
+    {           
+        int rabbits = 0, wolves = 0, bears = 0;      
+        for (int r = 0; r < size; r++)     
+        {        
+            for (int c = 0; c < size; c++)         
+            {               
+                if (world[r][c] != null)       
+                {                       
+                    if (world[r][c].getType().equals("Rabbit"))    
+                    {                                      
+                        rabbits++;                 
+                    }                                      
+                    else if (world[r][c].getType().equals("Wolf"))   
+                    {                                 
+                        wolves++;                 
+                    }                       
+                    else if (world[r][c].getType().equals("Bear"))               
+                    {                        
+                        bears++;                     
+                    }                            
+                }                   
+            }                  
+        }                     
+        
+        System.out.println("  [Rabbits: " + rabbits + "  Wolves: " + wolves + "  Bears: " + bears + "]");  
+    }         
+        
+        public static void main(String[] args)   
+        {            
+            Scanner input = new Scanner(System.in);        
+            int size = 5;      
+            Critter[][] world = new Critter[size][size];      
+            world[0][0] = new Rabbit();       
+            world[0][4] = new Rabbit();     
+            world[2][2] = new Wolf();         
+            world[4][0] = new Rabbit();       
+            world[4][4] = new Critter("Nathan", "N");       
+            System.out.println(" --- THE COOLEST CRITTER ECOSYSTEM ---");   
+            System.out.println("R = Rabbit   W = Wolf   N = Nathan    . = Empty");  
+            System.out.print("\nHow many cycles do you want to run? ");          
+            int cycles = input.nextInt();             
+            for (int c = 1; c <= cycles; c++)     
+            {                      
+                System.out.println("\n--- Cycle " + c + " ---");    
+                displayGrid(world, size);             
+                printStats(world, size);            
+                Critter[][] next = new Critter[size][size];      
+                for (int row = 0; row < size; row++)    
+                {                            
+                    for (int col = 0; col < size; col++)    
+                    {                               
+                        if (world[row][col] != null)  
+                        {                         
+                            Critter mover = world[row][col];  
+                            int[] dest = mover.move(row, col, size); 
+                            int newRow = dest[0];                     
+                            int newCol = dest[1];                  
+                            if (next[newRow][newCol] == null)     
+                            {                           
+                                next[newRow][newCol] = mover;  
+                            }          
+                            else      
+                            {         
+                                Critter resident = next[newRow][newCol];   
+                                System.out.println("  COLLISION at [" + newRow + "][" + newCol + "]: " + mover.interact(resident));      
+                                Critter winner;       
+                                boolean moverIsWolf = mover.getType().equals("Wolf");   
+                                boolean residentIsWolf = resident.getType().equals("Wolf");                              
+                                boolean moverIsRabbit = mover.getType().equals("Rabbit");               
+                                boolean residentIsRabbit = resident.getType().equals("Rabbit");         
+                                if (moverIsWolf && residentIsRabbit)               
+                                {            
+                                    winner = mover;        
+                                    System.out.println("  > Rabbit has been eaten and removed!... yummy.");                                             
+                                }           
+                                else if (residentIsWolf && moverIsRabbit)     
+                                {                
+                                    winner = resident;        
+                                    System.out.println("  > Rabbit has been eaten and removed!... yummy.");             
+                                }       
+                                else if (moverIsRabbit && residentIsRabbit)      
+                                {                              
+                                    winner = resident;       
+                                    System.out.println("  > Two Rabbits meet — a new Rabbit is born nearby!");    
+                                    boolean spawned = false;          
+                                    for (int dr = -1; dr <= 1 && !spawned; dr++)           
+                                    {          
+                                        for (int dc = -1; dc <= 1 && !spawned; dc++)     
+                                        {           
+                                            int br = newRow + dr;      
+                                            int bc = newCol + dc;           
+                                            boolean inBounds = br >= 0 && br < size && bc >= 0 && bc < size;      
+                                            boolean notSameCell = !(dr == 0 && dc == 0);                    
+                                            if (inBounds && notSameCell && next[br][bc] == null)   
+                                            {                              
+                                                next[br][bc] = new Rabbit();    
+                                                System.out.println("  > New Rabbit spawned at [" + br + "][" + bc + "]!");  
+                                                spawned = true;               
+                                            }        
+                                        }             
+                                    }                
+                                    if (!spawned)    
+                                    {                
+                                        System.out.println("  > No empty cell nearby — Rabbit could not be born.");  
+                                    }        
+                                }         
+                                else             
+                                {                
+                                    winner = resident;     
+                                    System.out.println("  >> " + resident.getType() + " holds the cell.");  
+                                }          
+                                next[newRow][newCol] = winner;     
+                            }         
+                        }              
+                    }             
+                }        
+                world = next;    
+            }           
+            
+            System.out.println("\n --- SIMULATION FINISHED ---");    
+            System.out.println("Final grid:");        
+            displayGrid(world, size);      
+            printStats(world, size);              
+            input.close();    
+        } 
+}
